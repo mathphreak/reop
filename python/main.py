@@ -34,7 +34,8 @@ parser.add_argument("-m", help="""When signing, the file containing the message
                     to verify.  When encrypting or decrypting, the
                     plaintext.""", action="store", dest="msgfile")
 parser.add_argument("-n", help="""Do not ask for a passphrase during key
-                    generation.""", action="store_true", dest="nopasswd")
+                    generation.""", action="store_const", dest="password",
+                    const="")
 parser.add_argument("-p", help="""A public key file produced by -G.""",
                     action="store", dest="pubkeyfile")
 parser.add_argument("-q", help="""Quiet mode.  Suppress informational
@@ -54,6 +55,7 @@ binary = arguments.binary
 embedded = arguments.embedded
 ident = arguments.ident
 msgfile = arguments.msgfile
+password = arguments.password
 pubkeyfile = arguments.pubkeyfile
 quiet = arguments.quiet
 seckeyfile = arguments.seckeyfile
@@ -120,3 +122,28 @@ elif verb == "GENERATE":
             print "Can't find HOME"
             sys.exit(1)
         reop_dir = os.path.join(home, ".reop")
+        if not os.path.exists(reop_dir):
+            try:
+                os.makedirs(reop_dir)
+            except StandardError as err:
+                print "Unable to create ~/.reop"
+                sys.exit(1)
+    reop.generate(pubkeyfile, seckeyfile, ident, password)
+elif verb == "SIGN":
+    if msgfile is None:
+        print "must specify message"
+        parser.print_usage()
+        sys.exit(1)
+    reop.signfile(seckeyfile, msgfile, xfile, embedded)
+elif verb == "VERIFY":
+    if msgfile is None and xfile is None:
+        print "must specify message or sigfile"
+        parser.print_usage()
+        sys.exit(1)
+    if msgfile is not None:
+        reop.verifysimple(pubkeyfile, msgfile, xfile, quiet)
+    else:
+        reop.verifyembedded(pubkeyfile, xfile, quiet)
+else:
+    parser.print_usage()
+    sys.exit(1)
