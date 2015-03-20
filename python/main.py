@@ -83,8 +83,7 @@ elif verb == "SIGN" or verb == "VERIFY":
 
 # run stuff
 if verb == "DECRYPT":
-    reop.decrypt(pubkeyfile, seckeyfile, msgfile,
-                 xfile)
+    reop.decrypt(pubkeyfile, seckeyfile, msgfile, xfile)
 elif verb == "ENCRYPT":
     if seckeyfile is not None and (pubkeyfile is None and ident is None):
         print "specify a public key or ident"
